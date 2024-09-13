@@ -26,7 +26,7 @@ ADU_GIT_COMMIT ?= "${AUTOREV}"
 
 SRCREV = "${ADU_GIT_COMMIT}"
 
-PV = "1.0+git${SRCPV}"
+PV = "1.1+git${SRCPV}"
 S = "${WORKDIR}/git" 
 
 # ADUC depends on azure-iot-sdk-c, DO Agent SDK, curl, and libmosquitto-dev

@@ -3,6 +3,9 @@
 # Note: ADU reference images are signed with test keys.
 
 LICENSE="CLOSED"
+SRC_URI = "\
+    file://public.pem \
+"
 
 # Path in the image to place the generated public key file.
 ADUC_KEY_DIR = "/adukey"
@@ -17,14 +20,14 @@ DEPENDS = "openssl-native"
 # ADUC_PRIVATE_KEY_PASSWORD is the build host path to the .pass password file for the private key.
 
 # Generate the public key file using openssl, private key, and password file.
-do_compile() {
-    openssl rsa -in ${ADUC_PRIVATE_KEY} -passin file:${ADUC_PRIVATE_KEY_PASSWORD} -out public.pem -outform PEM -pubout
-}
+# do_compile() {
+#     openssl rsa -in ${ADUC_PRIVATE_KEY} -passin file:${ADUC_PRIVATE_KEY_PASSWORD} -out public.pem -outform PEM -pubout
+# }
 
 # Install the public key file to ADUC_KEY_DIR
 do_install() {
     install -d ${D}${ADUC_KEY_DIR}
-    install -m 0444 public.pem ${D}${ADUC_KEY_DIR}/public.pem
+    install -m 0444 ${WORKDIR}/public.pem ${D}${ADUC_KEY_DIR}/public.pem
 }
 
 FILES:${PN} += "${ADUC_KEY_DIR}/public.pem"
