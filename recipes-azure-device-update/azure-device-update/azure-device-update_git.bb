@@ -46,7 +46,7 @@ WITH_FEATURE_DELTA_UPDATE ?= "0"
 # Setup NTP servers (and fallbacks) to sync the date+time and not fail when
 # verifying the TLS server ca cert due to "notBefore" property.
 # See do_install:append() below for where it installs timesyncd.conf
-SRC_URI += "file://timesyncd.conf"
+# SRC_URI += "file://timesyncd.conf"
 
 # Handle override of default vars with those for Gen2
 python() {
@@ -186,7 +186,8 @@ EXTRA_OECMAKE += "${@bb.utils.contains('ADU_EMBED_TEST_ROOT_KEYS', '1', '-DADUC_
 # curl - for running the diagnostics component, curl content downloader
 # azure-device-update-diffs - to include the recipe for github.com:azure/iot-hub-device-update-delta runtime shared lib for delta updates.
 #
-RDEPENDS:${PN} += "bash swupdate  adu-pub-key adu-log-dir deliveryoptimization-agent-service curl openssl-bin nss ca-certificates"
+# Remove adu-pub-key for now maybe add back in later?
+RDEPENDS:${PN} += "bash swupdate adu-log-dir deliveryoptimization-agent-service curl openssl-bin nss ca-certificates"
 RDEPENDS:${PN} += "${@bb.utils.contains('WITH_FEATURE_DELTA_UPDATE', '1', 'azure-device-update-diffs', '', d)}"
 
 ADUC_DATA_DIR ?= "/var/lib/adu"
@@ -230,8 +231,8 @@ do_compile[depends] += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-sdk-f
 
 do_install:append() {
     # Install timesyncd.conf to setup NTP to sync the time correctly.
-    install -d ${D}${sysconfdir}/systemd
-    install -m 0644 ${WORKDIR}/timesyncd.conf ${D}${sysconfdir}/systemd/
+    # install -d ${D}${sysconfdir}/systemd
+    # install -m 0644 ${UNPACKDIR}/timesyncd.conf ${D}${sysconfdir}/systemd/
 
     #create ADUC_DATA_DIR
     install -d ${D}${ADUC_DATA_DIR}

@@ -1,6 +1,6 @@
 # Installs and configures the DeliveryOptimization Agent Service
 
-LICENSE="CLOSED"
+LICENSE = "CLOSED"
 
 SRC_URI = "\
     file://deliveryoptimization-agent.service \
@@ -8,13 +8,16 @@ SRC_URI = "\
 
 SYSTEMD_SERVICE:${PN} = "deliveryoptimization-agent.service"
 
+S = "${WORKDIR}/sources"
+UNPACKDIR = "${S}"
+
 do_install:append() {
     install -d ${D}${systemd_system_unitdir}
-    install -m 0644 ${WORKDIR}/deliveryoptimization-agent.service ${D}${systemd_system_unitdir}
+    install -m 0644 ${UNPACKDIR}/deliveryoptimization-agent.service ${D}${systemd_system_unitdir}
 }
 
 FILES:${PN} += "${systemd_system_unitdir}/deliveryoptimization-agent.service"
 REQUIRED_DISTRO_FEATURES = "systemd"
 RDEPENDS:${PN} += "deliveryoptimization-agent"
 
-inherit allarch systemd
+inherit allarch systemd features_check

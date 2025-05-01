@@ -2,7 +2,7 @@
 # used to validate the signatures of images.
 # Note: ADU reference images are signed with test keys.
 
-LICENSE="CLOSED"
+LICENSE = "CLOSED"
 
 # Path in the image to place the generated public key file.
 ADUC_KEY_DIR = "/adukey"

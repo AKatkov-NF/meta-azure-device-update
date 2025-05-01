@@ -1,0 +1,25 @@
+From dd38e1c47ac0636b2ad3459aeb5e02a01e21b600 Mon Sep 17 00:00:00 2001
+From: Arteom Katkov <akatkov@nilfisk.com>
+Date: Thu, 1 May 2025 11:20:18 -0500
+Subject: [PATCH] Finish updating to boost 1.87
+
+---
+ Release/tests/functional/pplx/pplx_test/pplx_op_test.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Release/tests/functional/pplx/pplx_test/pplx_op_test.cpp b/Release/tests/functional/pplx/pplx_test/pplx_op_test.cpp
+index 82b10a7b..a797c317 100644
+--- a/Release/tests/functional/pplx/pplx_test/pplx_op_test.cpp
++++ b/Release/tests/functional/pplx/pplx_test/pplx_op_test.cpp
+@@ -57,7 +57,7 @@ class pplx_dflt_scheduler : public pplx::scheduler_interface
+     virtual void schedule(pplx::TaskProc_t proc, void* param)
+     {
+         pplx::details::atomic_increment(s_flag);
+-        m_pool->service().post([=]() -> void { proc(param); });
++        boost::asio::post(m_pool->service(), [=]() { proc(param); });
+     }
+ 
+ public:
+-- 
+2.34.1
+

@@ -1,0 +1,43 @@
+From 6fbc42d0d1b2929681e0c1a62e42834db40ecbf6 Mon Sep 17 00:00:00 2001
+From: Arteom Katkov <akatkov@nilfisk.com>
+Date: Thu, 1 May 2025 12:49:36 -0500
+Subject: [PATCH] Update to boost 1.87
+
+---
+ sdk-cpp/src/internal/rest/util/do_http_client.cpp | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/sdk-cpp/src/internal/rest/util/do_http_client.cpp b/sdk-cpp/src/internal/rest/util/do_http_client.cpp
+index ec58d6e..7076872 100644
+--- a/sdk-cpp/src/internal/rest/util/do_http_client.cpp
++++ b/sdk-cpp/src/internal/rest/util/do_http_client.cpp
+@@ -5,7 +5,7 @@
+ // Debian10 uses 1.67 while Ubuntu18.04 has 1.65.1.
+ // Starting in 1.66, boost::asio::io_service changed to io_context and retained io_service as a typedef.
+ // Include this header explicitly to get it regardless of which boost version is installed.
+-#include <boost/asio/io_service.hpp>
++#include <boost/asio/io_context.hpp>
+ #include <boost/asio/ip/tcp.hpp>
+ #include <gsl/gsl_util>
+ 
+@@ -40,7 +40,7 @@ public:
+     boost::system::error_code Connect(ushort port)
+     {
+         tcp::resolver resolver{_ioc};
+-        const auto endpoints = resolver.resolve({ "127.0.0.1", std::to_string(port) });
++        const auto endpoints = resolver.resolve("127.0.0.1", std::to_string(port));
+         boost::system::error_code ec;
+         boost::asio::connect(_socket, endpoints, ec);
+         return ec;
+@@ -58,7 +58,7 @@ public:
+     }
+ 
+ private:
+-    net::io_service _ioc;
++    net::io_context _ioc;
+     net::ip::tcp::socket _socket{_ioc};
+ };
+ 
+-- 
+2.34.1
+

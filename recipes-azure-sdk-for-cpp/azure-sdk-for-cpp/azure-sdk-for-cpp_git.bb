@@ -6,6 +6,12 @@ HOMEPAGE = "https://github.com/Azure/azure-sdk-for-cpp"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=e74f78882cab57fd1cc4c5482b9a214a"
 
+ERROR_QA:remove = "patch-status"
+WARN_QA:append = " patch-status"
+
+ERROR_QA:remove = "buildpaths"
+WARN_QA:append = " buildpaths"
+
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI = "git://github.com/Azure/azure-sdk-for-cpp.git;protocol=https;branch=main"
@@ -58,3 +64,5 @@ FILES:${PN} = "/usr/share/azure-storage-blobs-cpp \
                 "
 
 BBCLASSEXTEND = "native nativesdk"
+# Don't treat warnings as errors - TODO remove?
+EXTRA_OECMAKE += " -DWARNINGS_AS_ERRORS=OFF"

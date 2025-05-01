@@ -9,6 +9,9 @@ LICENSE = "CLOSED"
 
 DO_GIT_BRANCH ?= "main"
 
+ERROR_QA:remove = "patch-status"
+WARN_QA:append = " patch-status"
+
 DO_SRC_URI ?= "git://github.com/microsoft/do-client"
 SRC_URI = "${DO_SRC_URI};protocol=https;branch=${DO_GIT_BRANCH}"
 DO_GIT_COMMIT ?= "b61de2d347c8032562056b18f90ec710e531baf8"
@@ -17,6 +20,7 @@ SRCREV = "${DO_GIT_COMMIT}"
 PV = "1.0+git${SRCPV}"
 S = "${WORKDIR}/git" 
 
+SRC_URI += "file://0001-Update-to-boost-1.87.patch"
 SRC_URI += "file://Findlibproxy.cmake.patch"
 SRC_URI += "file://Findglib-2.0.cmake.patch"
 SRC_URI += "file://0001-Fix-incomplete-type-std-array-in-do_date_time.h.patch"

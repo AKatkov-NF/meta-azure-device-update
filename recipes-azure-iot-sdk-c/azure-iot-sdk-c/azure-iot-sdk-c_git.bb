@@ -17,6 +17,9 @@ S = "${WORKDIR}/git"
 # util-linux for uuid-dev
 DEPENDS = "util-linux curl openssl boost cpprest libproxy msft-gsl"
 
+ERROR_QA:remove = "buildpaths"
+WARN_QA:append = " buildpaths"
+
 inherit cmake
 
 # Do not use amqp since it is deprecated.

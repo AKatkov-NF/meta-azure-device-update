@@ -1,0 +1,173 @@
+From b5db3bc525340e50507cfeaa5e5ab21148d982cb Mon Sep 17 00:00:00 2001
+From: Arteom Katkov <akatkov@nilfisk.com>
+Date: Thu, 1 May 2025 13:09:00 -0500
+Subject: [PATCH] Update to boost 1.87
+
+---
+ client-lite/src/exe/docs.cpp                    | 8 +++++---
+ client-lite/src/ipc/rest_http_controller.cpp    | 2 +-
+ client-lite/src/ipc/rest_http_controller.h      | 2 +-
+ client-lite/src/ipc/rest_http_listener.cpp      | 4 ++--
+ client-lite/src/ipc/rest_http_listener.h        | 4 ++--
+ client-lite/src/ipc/rest_http_listener_conn.cpp | 7 ++++---
+ client-lite/src/ipc/rest_http_listener_conn.h   | 6 +++---
+ 7 files changed, 18 insertions(+), 15 deletions(-)
+
+diff --git a/client-lite/src/exe/docs.cpp b/client-lite/src/exe/docs.cpp
+index 53aa5cf..94ad16b 100644
+--- a/client-lite/src/exe/docs.cpp
++++ b/client-lite/src/exe/docs.cpp
+@@ -112,14 +112,16 @@ public:
+         _workerThread.join();
+     }
+ 
+-    boost::asio::io_service& IoService()
++    boost::asio::io_context& IoService()
+     {
+         return _io;
+     }
+ 
+ private:
+-    boost::asio::io_service _io;
+-    boost::asio::io_service::work _work { _io };
++    boost::asio::io_context _io;
++    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> _work{
++        boost::asio::make_work_guard(_io)
++    };    
+     std::thread _workerThread;
+ };
+ 
+diff --git a/client-lite/src/ipc/rest_http_controller.cpp b/client-lite/src/ipc/rest_http_controller.cpp
+index 2268410..33a5d47 100644
+--- a/client-lite/src/ipc/rest_http_controller.cpp
++++ b/client-lite/src/ipc/rest_http_controller.cpp
+@@ -28,7 +28,7 @@ RestHttpController::~RestHttpController()
+     (void)_callTracker.Wait();
+ }
+ 
+-void RestHttpController::Start(boost::asio::io_service& ioService)
++void RestHttpController::Start(boost::asio::io_context& ioService)
+ {
+     _listener.Start(ioService, std::bind(&RestHttpController::_HttpListenerCallback, this, std::placeholders::_1, std::placeholders::_2));
+ }
+diff --git a/client-lite/src/ipc/rest_http_controller.h b/client-lite/src/ipc/rest_http_controller.h
+index 87ab1d1..5eeeb38 100644
+--- a/client-lite/src/ipc/rest_http_controller.h
++++ b/client-lite/src/ipc/rest_http_controller.h
+@@ -19,7 +19,7 @@ public:
+     RestHttpController(ConfigManager& config, std::shared_ptr<DownloadManager> downloadManager);
+     ~RestHttpController();
+ 
+-    void Start(boost::asio::io_service& ioService);
++    void Start(boost::asio::io_context& ioService);
+     std::string ServerEndpoint() const;
+     uint16_t Port() const;
+ 
+diff --git a/client-lite/src/ipc/rest_http_listener.cpp b/client-lite/src/ipc/rest_http_listener.cpp
+index 498f3ce..4a4fab0 100644
+--- a/client-lite/src/ipc/rest_http_listener.cpp
++++ b/client-lite/src/ipc/rest_http_listener.cpp
+@@ -6,7 +6,7 @@
+ 
+ using boost_tcp_t = boost::asio::ip::tcp;
+ 
+-void RestHttpListener::Start(boost::asio::io_service& ioService, const http_listener_callback_t& requestHandler)
++void RestHttpListener::Start(boost::asio::io_context& ioService, const http_listener_callback_t& requestHandler)
+ {
+     _io = &ioService;
+     _requestHandler = requestHandler;
+@@ -16,7 +16,7 @@ void RestHttpListener::Start(boost::asio::io_service& ioService, const http_list
+     // We just choose a range that lies within all three implementations.
+     uint16_t restPort = 50000;
+     constexpr uint16_t restPortLimit = 60999;
+-    const auto addr = boost::asio::ip::address_v4::from_string("127.0.0.1");
++    const auto addr = boost::asio::ip::make_address_v4("127.0.0.1");
+     boost_tcp_t::endpoint endpoint(addr, restPort);
+     boost_tcp_t::acceptor tmpListener{ioService, endpoint.protocol()};
+     while (true)
+diff --git a/client-lite/src/ipc/rest_http_listener.h b/client-lite/src/ipc/rest_http_listener.h
+index bfcbfdf..92b9a9b 100644
+--- a/client-lite/src/ipc/rest_http_listener.h
++++ b/client-lite/src/ipc/rest_http_listener.h
+@@ -10,7 +10,7 @@
+ class RestHttpListener
+ {
+ public:
+-    void Start(boost::asio::io_service& ioService, const http_listener_callback_t& requestHandler);
++    void Start(boost::asio::io_context& ioService, const http_listener_callback_t& requestHandler);
+     void Stop();
+     std::string Endpoint() const;
+     uint16_t Port() const;
+@@ -21,7 +21,7 @@ private:
+ 
+     std::unique_ptr<boost::asio::ip::tcp::acceptor> _listener;
+     http_listener_callback_t _requestHandler;
+-    boost::asio::io_service* _io { nullptr };
++    boost::asio::io_context* _io { nullptr };
+ 
+     std::atomic<unsigned int> _numConnections { 0 };
+ };
+diff --git a/client-lite/src/ipc/rest_http_listener_conn.cpp b/client-lite/src/ipc/rest_http_listener_conn.cpp
+index 07291e6..159e072 100644
+--- a/client-lite/src/ipc/rest_http_listener_conn.cpp
++++ b/client-lite/src/ipc/rest_http_listener_conn.cpp
+@@ -10,7 +10,7 @@
+ using boost_tcp_t = boost::asio::ip::tcp;
+ namespace msdod = microsoft::deliveryoptimization::details;
+ 
+-HttpListenerConnection::HttpListenerConnection(boost::asio::io_service& ioService, std::shared_ptr<boost::asio::ip::tcp::socket> socket) :
++HttpListenerConnection::HttpListenerConnection(boost::asio::io_context& ioService, std::shared_ptr<boost::asio::ip::tcp::socket> socket) :
+     _socket(std::move(socket)),
+     _io(ioService)
+ {
+@@ -29,7 +29,7 @@ HttpListenerConnection::~HttpListenerConnection()
+     }
+ }
+ 
+-std::shared_ptr<HttpListenerConnection> HttpListenerConnection::Make(boost::asio::io_service& ioService,
++std::shared_ptr<HttpListenerConnection> HttpListenerConnection::Make(boost::asio::io_context& ioService,
+     std::shared_ptr<boost::asio::ip::tcp::socket> socket)
+ {
+     return std::make_shared<HttpListenerConnection>(ioService, std::move(socket));
+@@ -130,10 +130,11 @@ void HttpListenerConnection::_OnData(const boost::system::error_code& ec, size_t
+ 
+     if (_httpParser.Done())
+     {
+-        _io.post([this, lifetime = shared_from_this(), parsedData = _httpParser.ParsedData(), &callback]()
++        boost::asio::post(_io, [this, lifetime = shared_from_this(), parsedData = _httpParser.ParsedData(), &callback]()
+             {
+                 callback(parsedData, *this);
+             });
++
+         _httpParser.Reset(); // get ready for the next message
+     }
+ 
+diff --git a/client-lite/src/ipc/rest_http_listener_conn.h b/client-lite/src/ipc/rest_http_listener_conn.h
+index 5fa02fd..8d9c930 100644
+--- a/client-lite/src/ipc/rest_http_listener_conn.h
++++ b/client-lite/src/ipc/rest_http_listener_conn.h
+@@ -14,10 +14,10 @@ using http_listener_callback_t = std::function<void(const std::shared_ptr<micros
+ class HttpListenerConnection : public std::enable_shared_from_this<HttpListenerConnection>
+ {
+ public:
+-    HttpListenerConnection(boost::asio::io_service& ioService, std::shared_ptr<boost::asio::ip::tcp::socket> socket);
++    HttpListenerConnection(boost::asio::io_context& ioService, std::shared_ptr<boost::asio::ip::tcp::socket> socket);
+     ~HttpListenerConnection();
+ 
+-    static std::shared_ptr<HttpListenerConnection> Make(boost::asio::io_service& ioService,
++    static std::shared_ptr<HttpListenerConnection> Make(boost::asio::io_context& ioService,
+         std::shared_ptr<boost::asio::ip::tcp::socket> socket);
+ 
+     void Receive(http_listener_callback_t& callback);
+@@ -30,7 +30,7 @@ private:
+     void _OnData(const boost::system::error_code& ec, size_t cbRead, http_listener_callback_t& callback);
+ 
+     std::shared_ptr<boost::asio::ip::tcp::socket> _socket;
+-    boost::asio::io_service& _io;
++    boost::asio::io_context& _io;
+ 
+     std::vector<char> _recvBuf;
+     microsoft::deliveryoptimization::details::HttpParser _httpParser;
+-- 
+2.34.1
+
