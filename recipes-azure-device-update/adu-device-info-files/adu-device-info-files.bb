@@ -9,7 +9,7 @@
 # ADU_SOFTWARE_VERSION  The software version for the image/firmware. Will be written to
 #                       the version file that is read by ADU Client.
 
-LICENSE="CLOSED"
+LICENSE = "CLOSED"
 
 # Generate the manufacturer, model, and version files
 do_compile() {

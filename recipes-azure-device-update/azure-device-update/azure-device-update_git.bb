@@ -41,12 +41,13 @@ BUILD_TYPE ?= "Debug"
 # Feature flags
 #
 # Include DeltaUpdate Processor libary
-WITH_FEATURE_DELTA_UPDATE ?= "0"
+WITH_FEATURE_DELTA_UPDATE ?= "1"
 
 # Setup NTP servers (and fallbacks) to sync the date+time and not fail when
 # verifying the TLS server ca cert due to "notBefore" property.
 # See do_install:append() below for where it installs timesyncd.conf
 # SRC_URI += "file://timesyncd.conf"
+SRC_URI += "file://du-diagnostics-config.json"
 
 # Handle override of default vars with those for Gen2
 python() {
@@ -118,7 +119,7 @@ S = "${WORKDIR}/git"
 # Common Build Dependencies are:
 # curl, DO agent, and DO SDK
 # Gen2 requires mosquitto recipe from openembedded meta-networking layer
-DEPENDS = "deliveryoptimization-agent deliveryoptimization-sdk curl azure-iot-sdk-c"
+DEPENDS = "deliveryoptimization-agent deliveryoptimization-sdk curl azure-iot-sdk-c aziotd"
 DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-sdk-for-cpp', '', d)}"
 DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '2', 'mosquitto', '', d)}"
 
@@ -222,7 +223,7 @@ GROUPADD_PARAM:${PN} = "\
 # To download the update payload file, 'adu' user must be a member of 'do' group.
 # To save downloaded file into 'adu' downloads directory, 'do' user must be a member of 'adu' group.
 USERADD_PARAM:${PN} = "\
-    --uid 800 --system -g ${ADUGROUP} -G ${DOGROUP} --no-create-home --shell /bin/false ${ADUUSER} ; \
+    --uid 800 --system -g ${ADUGROUP} -G ${DOGROUP},aziotcs,aziotks,aziotid --no-create-home --shell /bin/false ${ADUUSER} ; \
     --uid 801 --system -g ${DOGROUP} -G ${ADUGROUP} --no-create-home --shell /bin/false ${DOUSER} ; \
     "
 
@@ -272,8 +273,12 @@ do_install:append() {
 
     #create ADUC_CONF_DIR
     install -d ${D}${ADUC_CONF_DIR}
-    chown root:${ADUGROUP} ${D}${ADUC_CONF_DIR}
-    chmod 0774 ${D}${ADUC_CONF_DIR}
+    chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_CONF_DIR}
+    chmod 0750 ${D}${ADUC_CONF_DIR}
+
+    #install du-diagnostics-config.json
+    install -m 0640 ${UNPACKDIR}/du-diagnostics-config.json ${D}${ADUC_CONF_DIR}/du-diagnostics-config.json
+    chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_CONF_DIR}/du-diagnostics-config.json
 
     #create ADUC_LOG_DIR
     install -d ${D}${ADUC_LOG_DIR}
