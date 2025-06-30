@@ -1,0 +1,24 @@
+From dbe76b58281e2b506c7e909cd12f5dc745a3ecf9 Mon Sep 17 00:00:00 2001
+From: Arteom Katkov <akatkov@nilfisk.com>
+Date: Wed, 25 Jun 2025 09:58:31 -0500
+Subject: [PATCH] fix gcc 15 build error
+
+---
+ .../azure-security-attestation/src/private/crypto/inc/crypto.hpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/sdk/attestation/azure-security-attestation/src/private/crypto/inc/crypto.hpp b/sdk/attestation/azure-security-attestation/src/private/crypto/inc/crypto.hpp
+index 4032f2551..0217ba0d6 100644
+--- a/sdk/attestation/azure-security-attestation/src/private/crypto/inc/crypto.hpp
++++ b/sdk/attestation/azure-security-attestation/src/private/crypto/inc/crypto.hpp
+@@ -2,6 +2,7 @@
+ // SPDX-License-Identifier: MIT
+ 
+ #pragma once
++#include <cstdint>
+ #include <ctime>
+ #include <memory>
+ #include <string>
+-- 
+2.34.1
+

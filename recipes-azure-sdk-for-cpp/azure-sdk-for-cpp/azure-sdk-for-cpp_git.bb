@@ -1,6 +1,6 @@
 # Build and install the azure-sdk-for-cpp
 
-DESCRIPTION = "Microsoft Azure SD for CPP"
+DESCRIPTION = "Microsoft Azure SDK for CPP"
 AUTHOR = "Microsoft Corporation"
 HOMEPAGE = "https://github.com/Azure/azure-sdk-for-cpp"
 LICENSE = "MIT"
@@ -20,6 +20,7 @@ SRCREV = "f757bb06e71adb829edcaf2867abc4e87c5aa23f"
 
 SRC_URI += "file://0001-Fixup-compiler-warning.patch \
             file://0002-fix-gcc13-base64-compile-error.patch \
+            file://0003-fix-gcc-15-build-error.patch \
             "
 PV = "1.0+git${SRCPV}"
 
