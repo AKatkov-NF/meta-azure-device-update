@@ -321,8 +321,8 @@ fakeroot python do_registerAgentExtensions() {
         register_content_handler("microsoft/steps:1", "{}/libmicrosoft_steps_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
         register_content_handler("microsoft/script:1", "{}/libmicrosoft_script_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
         register_content_downloader("{}/libdeliveryoptimization_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir)
-        register_content_downloader("{}/libcurl_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir) # NOTE: Note a content downloader, but uses the same registration format.
-        register_content_downloader("{}/libcontoso_component_enumerator.so".format(extensionInstallDir), componentEnumeratorRegistrationDirectory, workDir)
+        register_content_downloader("{}/libcurl_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir)
+        register_content_downloader("{}/libcontoso_component_enumerator.so".format(extensionInstallDir), componentEnumeratorRegistrationDirectory, workDir) # NOTE: Not a content downloader, but uses the same registration format.
         register_download_handler("microsoft/delta:1", "{}/libmicrosoft_delta_download_handler.so".format(extensionInstallDir), downloadHandlerRegistrationDirectory, workDir)
 
     except Exception as ex:
