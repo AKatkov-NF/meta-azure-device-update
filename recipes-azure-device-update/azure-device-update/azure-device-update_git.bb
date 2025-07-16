@@ -48,6 +48,7 @@ WITH_FEATURE_DELTA_UPDATE ?= "1"
 # See do_install:append() below for where it installs timesyncd.conf
 # SRC_URI += "file://timesyncd.conf"
 SRC_URI += "file://du-diagnostics-config.json"
+SRC_URI += "file://du-config.json"
 
 # Handle override of default vars with those for Gen2
 python() {
@@ -123,6 +124,20 @@ DEPENDS = "deliveryoptimization-agent deliveryoptimization-sdk curl azure-iot-sd
 DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '1', 'azure-sdk-for-cpp', '', d)}"
 DEPENDS += "${@bb.utils.contains('ADU_GENERATION', '2', 'mosquitto', '', d)}"
 
+# /adu is a separate partition that is not updated during an OTA update
+ADUC_LOG_DIR ?= "/adu/logs"
+ADUC_CONF_DIR ?= "/adu"
+
+ADUC_DATA_DIR ?= "/var/lib/adu"
+ADUC_EXTENSIONS_DIR ?= "${ADUC_DATA_DIR}/extensions"
+ADUC_EXTENSIONS_INSTALL_DIR ?= "${ADUC_EXTENSIONS_DIR}/sources"
+ADUC_COMPONENT_ENUMERATOR_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/component_enumerator"
+ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/content_downloader"
+ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/update_content_handlers"
+ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/download_handlers"
+ADUC_DOWNLOADS_DIR ?= "${ADUC_DATA_DIR}/downloads"
+ADUC_DOWNLOADS_FOLDER ?= "${ADUC_DOWNLOADS_DIR}"
+
 # Append to the build-time dependencies as per differences between Gen1 and Gen2
 #
 # Generation 2 needs these to build:
@@ -161,10 +176,10 @@ EXTRA_OECMAKE += "-DADUC_VERSION_FILE=${sysconfdir}/adu-version"
 # Use zlog as the logging library.
 EXTRA_OECMAKE += "-DADUC_LOGGING_LIBRARY=zlog"
 # Change the log directory.
-EXTRA_OECMAKE += "-DADUC_LOG_FOLDER=/adu/logs"
+EXTRA_OECMAKE += "-DADUC_LOG_FOLDER=${ADUC_LOG_DIR}"
 # Use /adu directory for configuration.
 # The /adu directory is on a seperate partition and is not updated during an OTA update.
-EXTRA_OECMAKE += "-DADUC_CONF_FOLDER=/adu"
+EXTRA_OECMAKE += "-DADUC_CONF_FOLDER=${ADUC_CONF_DIR}"
 # Don't install/configure the daemon, another bitbake recipe will do that.
 EXTRA_OECMAKE += "-DADUC_INSTALL_DAEMON=OFF"
 # Using the installed DO SDK include files.
@@ -191,19 +206,6 @@ EXTRA_OECMAKE += "${@bb.utils.contains('ADU_EMBED_TEST_ROOT_KEYS', '1', '-DADUC_
 RDEPENDS:${PN} += "bash swupdate adu-log-dir deliveryoptimization-agent-service curl openssl-bin nss ca-certificates"
 RDEPENDS:${PN} += "${@bb.utils.contains('WITH_FEATURE_DELTA_UPDATE', '1', 'azure-device-update-diffs', '', d)}"
 
-ADUC_DATA_DIR ?= "/var/lib/adu"
-ADUC_EXTENSIONS_DIR ?= "${ADUC_DATA_DIR}/extensions"
-ADUC_EXTENSIONS_INSTALL_DIR ?= "${ADUC_EXTENSIONS_DIR}/sources"
-ADUC_COMPONENT_ENUMERATOR_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/component_enumerator"
-ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/content_downloader"
-ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/update_content_handlers"
-ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR ?= "${ADUC_EXTENSIONS_DIR}/download_handlers"
-ADUC_DOWNLOADS_DIR ?= "${ADUC_DATA_DIR}/downloads"
-ADUC_DOWNLOADS_FOLDER ?= "${ADUC_DOWNLOADS_DIR}"
-
-ADUC_LOG_DIR ?= "/adu/logs"
-ADUC_CONF_DIR ?= "/adu"
-
 ADUUSER = "adu"
 ADUGROUP = "adu"
 DOUSER = "do"
@@ -212,8 +214,8 @@ DOGROUP = "do"
 USERADD_PACKAGES = "${PN}"
 
 GROUPADD_PARAM:${PN} = "\
-    --gid 800 --system adu ; \
-    --gid 801 --system do ; \
+    --gid 800 --system ${ADUGROUP} ; \
+    --gid 801 --system ${DOGROUP} ; \
     "
 
 # USERADD_PARAM specifies command line options to pass to the
@@ -271,16 +273,20 @@ do_install:append() {
     chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_DOWNLOADS_DIR}
     chmod 0770 ${D}${ADUC_DOWNLOADS_DIR}
 
-    #create ADUC_CONF_DIR
+    # create ADUC_CONF_DIR
     install -d ${D}${ADUC_CONF_DIR}
     chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_CONF_DIR}
     chmod 0750 ${D}${ADUC_CONF_DIR}
 
-    #install du-diagnostics-config.json
+    # install du-diagnostics-config.json
     install -m 0640 ${UNPACKDIR}/du-diagnostics-config.json ${D}${ADUC_CONF_DIR}/du-diagnostics-config.json
     chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_CONF_DIR}/du-diagnostics-config.json
 
-    #create ADUC_LOG_DIR
+    # install du-config.json
+    install -m 0640 ${UNPACKDIR}/du-config.json ${D}${ADUC_CONF_DIR}/du-config.json
+    chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_CONF_DIR}/du-config.json
+
+    # create ADUC_LOG_DIR
     install -d ${D}${ADUC_LOG_DIR}
     chown ${ADUUSER}:${ADUGROUP} ${D}${ADUC_LOG_DIR}
     chmod 0774 ${D}${ADUC_LOG_DIR}
