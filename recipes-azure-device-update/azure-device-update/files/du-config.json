@@ -7,7 +7,6 @@
     "iotHubProtocol": "mqtt",
     "manufacturer": "NILFISK",
     "model": "ATC",
-    "downloadsFolder": "/data/adu/downloads",
     "agents": [
       {
         "name": "ATC-Agent",
