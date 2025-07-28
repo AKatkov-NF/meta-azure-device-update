@@ -311,7 +311,7 @@ fakeroot python do_registerAgentExtensions() {
         extensionInstallDir = d.getVar("ADUC_EXTENSIONS_INSTALL_DIR")
         updateContentRegistrationDirectory = d.getVar("ADUC_UPDATE_CONTENT_HANDLER_EXTENSION_DIR")
         contentDownloaderRegistrationDirectory = d.getVar("ADUC_CONTENT_DOWNLOADER_EXTENSION_DIR")
-        downloadHandlerRegistrationDirectory = d.getVar("ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR")
+        # downloadHandlerRegistrationDirectory = d.getVar("ADUC_DOWNLOAD_HANDLER_EXTENSION_DIR")
         componentEnumeratorRegistrationDirectory = d.getVar("ADUC_COMPONENT_ENUMERATOR_EXTENSION_DIR")
 
         register_content_handler("microsoft/swupdate:2", "{}/libmicrosoft_swupdate_2.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
@@ -320,10 +320,10 @@ fakeroot python do_registerAgentExtensions() {
         register_content_handler("microsoft/update-manifest:5", "{}/libmicrosoft_steps_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
         register_content_handler("microsoft/steps:1", "{}/libmicrosoft_steps_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
         register_content_handler("microsoft/script:1", "{}/libmicrosoft_script_1.so".format(extensionInstallDir), updateContentRegistrationDirectory, workDir)
-        register_content_downloader("{}/libdeliveryoptimization_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir)
+        # register_content_downloader("{}/libdeliveryoptimization_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir)
         register_content_downloader("{}/libcurl_content_downloader.so".format(extensionInstallDir), contentDownloaderRegistrationDirectory, workDir)
         register_content_downloader("{}/libcontoso_component_enumerator.so".format(extensionInstallDir), componentEnumeratorRegistrationDirectory, workDir) # NOTE: Not a content downloader, but uses the same registration format.
-        register_download_handler("microsoft/delta:1", "{}/libmicrosoft_delta_download_handler.so".format(extensionInstallDir), downloadHandlerRegistrationDirectory, workDir)
+        # register_download_handler("microsoft/delta:1", "{}/libmicrosoft_delta_download_handler.so".format(extensionInstallDir), downloadHandlerRegistrationDirectory, workDir)
 
     except Exception as ex:
         errorMessage = "Failed to create DU Agent extension registration. An exception of type {0} occurred with message:\n{1} and Arguments:\n{2!r}".format(type(ex).__name__, str(ex), ex.args)
