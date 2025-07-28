@@ -1,0 +1,22 @@
+{
+    "schemaVersion": "1.1",
+    "aduShellTrustedUsers": [
+      "adu",
+      "do"
+    ],
+    "iotHubProtocol": "mqtt",
+    "manufacturer": "NILFISK",
+    "model": "ATC",
+    "agents": [
+      {
+        "name": "ATC-Agent",
+        "runas": "adu",
+        "connectionSource": {
+          "connectionType": "AIS",
+          "connectionData": ""
+        },
+        "manufacturer": "NILFISK",
+        "model": "ATC"
+      }
+    ]
+}
